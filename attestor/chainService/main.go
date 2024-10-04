@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 
@@ -14,6 +15,9 @@ import (
 	"github.com/venture23-aleo/verulink/attestor/chainService/logger"
 	"github.com/venture23-aleo/verulink/attestor/chainService/relay"
 	"github.com/venture23-aleo/verulink/attestor/chainService/store"
+
+	"net/http"
+	_ "net/http/pprof"
 )
 
 // flags
@@ -66,6 +70,9 @@ func main() {
 		fmt.Printf("Error while initializing db store: %s\n", err.Error())
 		os.Exit(1)
 	}
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
 
 	relay.StartRelay(ctx, config.GetConfig())
 }
