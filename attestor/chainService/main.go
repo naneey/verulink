@@ -4,6 +4,9 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 
@@ -11,12 +14,11 @@ import (
 	_ "github.com/venture23-aleo/verulink/attestor/chainService/chain/ethereum"
 	"github.com/venture23-aleo/verulink/attestor/chainService/metrics"
 	"go.uber.org/zap"
-	
+
 	"github.com/venture23-aleo/verulink/attestor/chainService/config"
 	"github.com/venture23-aleo/verulink/attestor/chainService/logger"
 	"github.com/venture23-aleo/verulink/attestor/chainService/relay"
 	"github.com/venture23-aleo/verulink/attestor/chainService/store"
-
 )
 
 // flags
@@ -75,6 +77,9 @@ func main() {
 		os.Exit(1)
 	}
 
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
 	pmetrics := metrics.NewPrometheusMetrics()
 	go metrics.PushMetrics(ctx, pusher, pmetrics)
 	pmetrics.StartVersion(logger.AttestorName, config.GetConfig().Version)
