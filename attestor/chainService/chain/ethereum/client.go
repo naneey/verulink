@@ -14,9 +14,8 @@ import (
 	abi "github.com/venture23-aleo/verulink/attestor/chainService/chain/ethereum/abi"
 	"github.com/venture23-aleo/verulink/attestor/chainService/config"
 	"github.com/venture23-aleo/verulink/attestor/chainService/logger"
-	"github.com/venture23-aleo/verulink/attestor/chainService/metrics"
 	"github.com/venture23-aleo/verulink/attestor/chainService/store"
-	
+
 	ether "github.com/ethereum/go-ethereum"
 	ethCommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -148,7 +147,6 @@ type Client struct {
 	feedPktWaitDur            time.Duration
 	retryPacketWaitDur        time.Duration
 	pruneBaseSeqNumberWaitDur time.Duration
-	metrics                   *metrics.PrometheusMetrics
 }
 
 func (cl *Client) Name() string {
@@ -162,10 +160,8 @@ func (cl *Client) blockHeightPriorWaitDur(ctx context.Context) (uint64, error) {
 	curHeight, err := cl.eth.GetCurrentBlock(ctx)
 	if err != nil {
 		logger.GetLogger().Error("error while getting current height")
-		cl.metrics.UpdateEthRPCStatus(logger.AttestorName, cl.chainID.String(), DOWN)
 		return 0, err
 	}
-	cl.metrics.UpdateEthRPCStatus(logger.AttestorName, cl.chainID.String(), UP)
 	return curHeight - cl.waitHeight, nil // total number of blocks that has to be passed in the waiting duration
 }
 
@@ -229,8 +225,7 @@ func (cl *Client) FeedPacket(ctx context.Context, ch chan<- *chain.Packet) {
 	var baseHeight uint64 = math.MaxUint64
 	for dest := range cl.destChainsIDMap {
 		ns := baseSeqNumNameSpacePrefix + dest
-		startSeqNum, startHeight := store.GetStartingSeqNumAndHeight(ns)
-		cl.metrics.StoredSequenceNo(logger.AttestorName, cl.chainID.String(), dest, float64(startSeqNum))
+		_, startHeight := store.GetStartingSeqNumAndHeight(ns)
 
 		if startHeight < baseHeight {
 			baseHeight = startHeight
@@ -286,7 +281,6 @@ func (cl *Client) FeedPacket(ctx context.Context, ch chan<- *chain.Packet) {
 
 				for _, pkt := range pkts {
 					if _, ok := cl.destChainsIDMap[pkt.Destination.ChainID.String()]; ok {
-						cl.metrics.AddInPackets(logger.AttestorName, cl.chainID.String(), pkt.Destination.ChainID.String())
 						ch <- pkt
 					}
 				}
@@ -347,7 +341,6 @@ func (cl *Client) pruneBaseSeqNum(ctx context.Context, ch chan<- *chain.Packet) 
 
 		logger.GetLogger().Info("pruning ethereum base sequence number namespace",
 			zap.String("namespace", baseSeqNamespaces[index]))
-		cl.metrics.SetAttestorHealth(logger.AttestorName, cl.chainID.String(), float64(time.Now().Unix()))
 
 		ns := baseSeqNamespaces[index]
 		chainIDStr := strings.ReplaceAll(ns, baseSeqNumNameSpacePrefix, "")
@@ -429,7 +422,6 @@ func (cl *Client) managePacket(ctx context.Context) {
 					zap.Error(err),
 					zap.String("namespace", ns))
 			}
-			cl.metrics.UpdateProcessedSequence(logger.AttestorName, pkt.Source.ChainID.String(), pkt.Destination.ChainID.String(), float64(pkt.Sequence))
 		}
 	}
 }
@@ -453,10 +445,6 @@ func (cl *Client) GetMissedPacket(
 		}
 	}
 	return nil, errors.New("packet not found")
-}
-
-func (cl *Client) SetMetrics(metrics *metrics.PrometheusMetrics) {
-	cl.metrics = metrics
 }
 
 // NewClient initializes Client and returns the interface to chain.IClient

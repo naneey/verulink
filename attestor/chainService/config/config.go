@@ -64,8 +64,7 @@ type Config struct {
 	SigningServiceConfig   SigningServiceConfig   `yaml:"signing_service"`
 	CollectorServiceConfig CollecterServiceConfig `yaml:"collector_service"`
 	CheckHealthServiceDur  time.Duration          `yaml:"check_health_service"`
-	MetricConfig           MetricsConfig          `yaml:"metrics"`
-	Version                string                    `yaml:"version"`
+	Version                string                 `yaml:"version"`
 }
 
 type LoggerConfig struct {
@@ -74,10 +73,6 @@ type LoggerConfig struct {
 	OutputPath string `yaml:"-"` // calculated based on OutputDir
 }
 
-type MetricsConfig struct {
-	Host    string `yaml:"host"`
-	JobName string `yaml:"job_name"`
-}
 
 type SigningServiceConfig struct {
 	Host           string `yaml:"host"`

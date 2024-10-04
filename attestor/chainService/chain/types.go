@@ -11,7 +11,6 @@ import (
 	"github.com/venture23-aleo/verulink/attestor/chainService/config"
 	"github.com/venture23-aleo/verulink/attestor/chainService/logger"
 	"go.uber.org/zap"
-	"github.com/venture23-aleo/verulink/attestor/chainService/metrics"
 )
 
 type ClientFunc func(cfg *config.ChainConfig) IClient
@@ -27,7 +26,6 @@ type IClient interface {
 	GetMissedPacket(
 		ctx context.Context, missedPkt *MissedPacket) (
 		*Packet, error)
-	SetMetrics(metrics *metrics.PrometheusMetrics)
 }
 
 type NetworkAddress struct {

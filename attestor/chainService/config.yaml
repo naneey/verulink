@@ -1,35 +1,35 @@
 ---
-name: <releaseIdentifier>_attestor_verulink_<yourCompanyIdentifier>
+name: dev_attestor_verulink_v23
 version: 1.0.0
 chains:
 - name: aleo
-  chain_id: 6694886634401
-  wallet_address: <your_aleo_wallet_address> # wallet indentifier
-  bridge_contract: vlink_token_bridge_v1.aleo
-  node_url: https://api.explorer.provable.com/v1|mainnet
+  chain_id: 6694886634403
+  wallet_address:  aleo1zgyyxkjxadc4y7aks4rscmz6sq59wljrjckuwgrwsx034uxkkuyqmtjdw7
+  bridge_contract: token_bridge_v0002.aleo
+  node_url: https://api.explorer.aleo.org/v1|testnet
   sequence_num_start:
     ethereum: 1
     # solana: 23 # solana is just for config example
-  pkt_validity_wait_dur: 86400s
-  finality_height: 28800
-  retry_packet_wait_dur: 10m
-  prune_base_seq_num_wait_dur: 30m
+  pkt_validity_wait_dur: 10s
+  finality_height: 1
+  retry_packet_wait_dur: 1m
+  prune_base_seq_num_wait_dur: 1m
   average_block_gen_dur: 3s
   dest_chains:
     - ethereum
 
 - name: ethereum
-  chain_id: 27234042785
-  wallet_address: <your_ethereum_wallet_address>
-  bridge_contract: 0x7440176A6F367D3Fad1754519bD8033EAF173133
-  node_url: https://eth.llamarpc.com
+  chain_id: 28556963657430695
+  wallet_address: 0x5dc561633f195d44a530cdf0f288a409286797ff
+  bridge_contract: 0xBc6EA59DFe5500Cf5B44b6c29b262B65a9Ea9358
+  node_url: https://rpc.sepolia.org
   start_height: 20740576
-  finality_height: 7050
+  finality_height: 10
   filter_topic: 0x23b9e965d90a00cd3ad31e46b58592d41203f5789805c086b955e34ecd462eb9
-  feed_pkt_wait_dur: 15m
-  pkt_validity_wait_dur: 84600s
-  retry_packet_wait_dur: 10m
-  prune_base_seq_num_wait_dur: 30m
+  feed_pkt_wait_dur: 2s
+  pkt_validity_wait_dur: 2s
+  retry_packet_wait_dur: 1m
+  prune_base_seq_num_wait_dur: 1m
   dest_chains:
     - aleo
 
@@ -39,7 +39,7 @@ consume_packet_workers: 10 # Default is 10
 log:
   encoding: console
   output_dir: /path/to/log/dir
-mode: prod # dev/prod
+mode: dev # dev/prod
 
 signing_service:
   host: signingservice
@@ -50,13 +50,9 @@ signing_service:
   password: "password"
   health_end_point: "/health"
 collector_service:
-  uri : <collector_service_url>
+  uri : https://aleomtls.venture23.xyz
   # Within collector_wait_dur, collector-service will try to collect all unconfirmed packets iteratively
   collector_wait_dur: 1h
   ca_certificate: /configs/.mtls/ca.cer
   attestor_certificate: /configs/.mtls/attestor1.crt
   attestor_key: /configs/.mtls/attestor1.key
-
-metrics:
-  host: <prometheus_pushgateway_url>
-  job_name: prod-push-gateway
