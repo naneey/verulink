@@ -24,8 +24,10 @@ services:
       DB_PATH: *p
       LOG_PATH: *l
       LOG_ENC: json
-      MODE: prod
-      CLEAN_START: false
+      MODE: dev
+      CLEAN_START: true
+    ports:
+      - 6060:6060
   signingservice:
     build:
       context: .
